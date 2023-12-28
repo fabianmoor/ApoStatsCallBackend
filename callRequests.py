@@ -3,6 +3,8 @@ import os
 from datetime import datetime
 from flask import Flask, jsonify
 from flask_cors import CORS
+# TEST
+from flask import make_response
 
 #app = Flask(__name__)
 #CORS(app)
@@ -58,6 +60,10 @@ def countCallsForAllUsers():
 @app.route('/get_all_calls', methods=['GET'])
 def get_all_calls():
     all_user_calls = countCallsForAllUsers()
+    # TEST
+    response = make_response(jsonify(all_user_calls))
+    # TEST
+    response.headers['Access-Control-Allow-Origin'] = 'https://apo-ex-call-stats.vercel.app'
     return jsonify(all_user_calls)
 
 if __name__ == '__main__':
