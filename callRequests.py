@@ -4,8 +4,12 @@ from datetime import datetime
 from flask import Flask, jsonify
 from flask_cors import CORS
 
+#app = Flask(__name__)
+#CORS(app)
+
 app = Flask(__name__)
-CORS(app)
+cors = CORS(app, resources={r"/get_all_calls": {"origins": "https://apo-ex-call-stats.vercel.app"}})
+
 
 UsersKundtjanst = {
     "JULIA": "0104102466",
