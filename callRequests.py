@@ -10,7 +10,7 @@ from flask import make_response
 #CORS(app)
 
 app = Flask(__name__)
-cors = CORS(app, resources={r"/get_all_calls": {"origins": "https://apo-ex-call-stats.vercel.app"}})
+cors = CORS(app, resources={r"/get_all_calls": {"origins": "https://apostats.vercel.app"}})
 
 
 UsersKundtjanst = {
