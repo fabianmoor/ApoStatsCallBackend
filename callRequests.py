@@ -24,6 +24,7 @@ UsersKundtjanst = {
 UsersAPI = {
     "0104104956": os.environ['TELAVOX_API_KEY'],
     "0104102466": os.environ['TELAVOX_API_KEY_JULIA'],
+    "0104102496": os.environ['TELAVOX_API_KEY_SOFIA'],    
 }
 
 def getCurrentDate():
