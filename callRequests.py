@@ -91,7 +91,7 @@ def countCallsForAllUsers():
             print(f"Request exception occurred for {username}: {req_err}")
     if today_date != getCurrentDate():
         today_date = getCurrentDate()
-        for user in all_calls:
+        for username in all_calls:
             all_calls[username] = 0
         
     return all_calls
