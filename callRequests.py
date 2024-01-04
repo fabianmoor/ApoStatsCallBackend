@@ -64,7 +64,7 @@ today_date = getCurrentDate()
 
 def countCallsForAllUsers():
 
-    global today_date
+    global today_date, all_calls
     for username, user_id in UsersKundtjanst.items():
         USER_API = UsersAPI.get(user_id)
 
