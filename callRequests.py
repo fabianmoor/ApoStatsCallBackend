@@ -54,38 +54,34 @@ all_calls = {
     "SOFIA": _INITSOFIA-1,
     "FABIAN": _INITFABIAN-1,
 }
+
 def getCurrentDate():
     current_date = datetime.now()
     todayDate = current_date.strftime('%Y-%m-%d')
     return todayDate
 
-
 today_date = getCurrentDate()
 
 def countCallsForAllUsers():
-
     global today_date, all_calls
     for username, user_id in UsersKundtjanst.items():
         USER_API = UsersAPI.get(user_id)
-
         headers = {
             "Authorization": f"Bearer {USER_API}",
         }
-
         params = {
             "fromDate": today_date,
             "toDate": today_date,
         }
-
         try:
             response = requests.get("https://api.telavox.se/calls", headers=headers, params=params)
             response.raise_for_status()
             incoming_calls = response.json().get('incoming', [])
             
-            if previous_calls[username] is None or incoming_calls != previous_calls[username]:
+            if previous_calls[username] is None or incoming_calls[0] != previous_calls[username]:
                 all_calls[username] += 1
                 print(f"{username} took a call. Added one call.")
-                previous_calls[username] = incoming_calls  # Update previous_calls
+                previous_calls[username] = incoming_calls[0]  # Update previous_calls
 
         except requests.exceptions.RequestException as req_err:
             print(f"Request exception occurred for {username}: {req_err}")
