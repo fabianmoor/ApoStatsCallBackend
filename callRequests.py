@@ -60,6 +60,8 @@ def getCurrentDate():
     todayDate = current_date.strftime('%Y-%m-%d')
     return todayDate
 
+today_date = getCurrentDate()
+
 def countCallsForAllUsers():
     global today_date, all_calls
     for username, user_id in UsersKundtjanst.items():
