@@ -60,8 +60,6 @@ def getCurrentDate():
     todayDate = current_date.strftime('%Y-%m-%d')
     return todayDate
 
-today_date = getCurrentDate()
-
 def countCallsForAllUsers():
     global today_date, all_calls
     for username, user_id in UsersKundtjanst.items():
@@ -70,8 +68,8 @@ def countCallsForAllUsers():
             "Authorization": f"Bearer {USER_API}",
         }
         params = {
-            "fromDate": today_date,
-            "toDate": today_date,
+            "fromDate": getCurrentDate(),
+            "toDate": getCurrentDate(),
         }
         try:
             response = requests.get("https://api.telavox.se/calls", headers=headers, params=params)
