@@ -63,7 +63,7 @@ def getCurrentDate():
 today_date = getCurrentDate()
 
 def countCallsForAllUsers():
-    global today_date, all_calls
+    global today_date, all_calls, previous_calls
     for username, user_id in UsersKundtjanst.items():
         USER_API = UsersAPI.get(user_id)
         headers = {
@@ -78,14 +78,12 @@ def countCallsForAllUsers():
             response.raise_for_status()
             incoming_calls = response.json().get('incoming', [])
 
-            if previous_calls[username] is None:
-                previous_calls[username] = incoming_calls[0]['callId'] if incoming_calls else None
-            else:
-                latest_call_id = incoming_calls[0]['callId'] if incoming_calls else None
-                if latest_call_id != previous_calls[username]:
+            if incoming_calls:
+                latest_call_id = incoming_calls[0]['callId']
+                if previous_calls[username] != latest_call_id:
                     all_calls[username] += 1
                     print(f"{username} took a call. Added one call.")
-                    previous_calls[username] = latest_call_id
+                previous_calls[username] = latest_call_id
             
         except requests.exceptions.RequestException as req_err:
             print(f"Request exception occurred for {username}: {req_err}")
