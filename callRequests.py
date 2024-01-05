@@ -48,11 +48,11 @@ previous_calls = {
 }
 
 all_calls = {
-    "JULIA": _INITJULIA,
-    "MILLA": _INITMILLA,
-    "VALDEMAR": _INITVALDEMAR,
-    "SOFIA": _INITSOFIA,
-    "FABIAN": _INITFABIAN,
+    "JULIA": _INITJULIA-1,
+    "MILLA": _INITMILLA-1,
+    "VALDEMAR": _INITVALDEMAR-1,
+    "SOFIA": _INITSOFIA-1,
+    "FABIAN": _INITFABIAN-1,
 }
 
 def getCurrentDate():
