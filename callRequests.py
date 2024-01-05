@@ -77,15 +77,19 @@ def countCallsForAllUsers():
             response = requests.get("https://api.telavox.se/calls", headers=headers, params=params)
             response.raise_for_status()
             incoming_calls = response.json().get('incoming', [])
-            if previous_calls[username] is None or incoming_calls[0]['callId'] != previous_calls[username]:
-                all_calls[username] += 1
-                print(f"{username} took a call. Added one call.")
-                try:
-                    previous_calls[username] = incoming_calls[0]['callId']  # Update previous_calls
-                except IndexError:
-                    continue
+
+            if previous_calls[username] is None:
+                previous_calls[username] = incoming_calls[0]['callId'] if incoming_calls else None
+            else:
+                latest_call_id = incoming_calls[0]['callId'] if incoming_calls else None
+                if latest_call_id != previous_calls[username]:
+                    all_calls[username] += 1
+                    print(f"{username} took a call. Added one call.")
+                    previous_calls[username] = latest_call_id
+            
         except requests.exceptions.RequestException as req_err:
             print(f"Request exception occurred for {username}: {req_err}")
+            
     if today_date != getCurrentDate():
         today_date = getCurrentDate()
         for username in all_calls:
