@@ -48,11 +48,11 @@ previous_calls = {
 }
 
 all_calls = {
-    "JULIA": _INITJULIA-1,
-    "MILLA": _INITMILLA-1,
-    "VALDEMAR": _INITVALDEMAR-1,
-    "SOFIA": _INITSOFIA-1,
-    "FABIAN": _INITFABIAN-1,
+    "JULIA": _INITJULIA,
+    "MILLA": _INITMILLA,
+    "VALDEMAR": _INITVALDEMAR,
+    "SOFIA": _INITSOFIA,
+    "FABIAN": _INITFABIAN,
 }
 
 def getCurrentDate():
@@ -94,6 +94,11 @@ def countCallsForAllUsers():
             all_calls[username] = 0
         
     return all_calls
+
+@app.route('/test_incriment', methods=['GET'])
+def test_incriment():
+    all_calls['MILLA'] += 1
+
 
 @app.route('/get_all_calls', methods=['GET'])
 def get_all_calls():
