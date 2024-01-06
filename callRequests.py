@@ -16,7 +16,7 @@ origins = [
         "localhost:3000"
         ]
 
-cors = CORS(app, resources={r"/get_all_calls": {"origins": origins})
+cors = CORS(app, resources={r"/get_all_calls": {"origins": origins}})
 
 _INITJULIA = 0
 _INITMILLA = 0
