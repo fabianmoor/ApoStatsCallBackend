@@ -95,11 +95,6 @@ def countCallsForAllUsers():
         
     return all_calls
 
-@app.route('/test_incriment', methods=['GET'])
-def test_incriment():
-    all_calls['MILLA'] += 1
-
-
 @app.route('/get_all_calls', methods=['GET'])
 def get_all_calls():
     all_user_calls = countCallsForAllUsers()
