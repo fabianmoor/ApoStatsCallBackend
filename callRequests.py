@@ -10,7 +10,13 @@ from flask import make_response
 #CORS(app)
 
 app = Flask(__name__)
-cors = CORS(app, resources={r"/get_all_calls": {"origins": "https://apostats.vercel.app"}})
+
+origins = [
+        "https://apostats.vercel.app",
+        "localhost:3000"
+        ]
+
+cors = CORS(app, resources={r"/get_all_calls": {"origins": origins})
 
 _INITJULIA = 0
 _INITMILLA = 0
