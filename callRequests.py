@@ -13,7 +13,7 @@ app = Flask(__name__)
 
 origins = [
         "https://apostats.vercel.app",
-        "localhost:3000"
+        "http://localhost:3000"
         ]
 
 cors = CORS(app, resources={r"/get_all_calls": {"origins": origins}})
