@@ -61,6 +61,12 @@ all_calls = {
     "FABIAN": _INITFABIAN,
 }
 
+
+def clear_calls():
+    global all_user
+    for i in all_calls:
+        all_calls[i] = 0
+
 def getCurrentDate():
     current_date = datetime.now()
     todayDate = current_date.strftime('%Y-%m-%d')
@@ -89,7 +95,7 @@ def countCallsForAllUsers():
                 if previous_calls[username] != latest_call_id:
                     all_calls[username] += 1
                     print(f"{username} took a call. Added one call.")
-                previous_calls[username] = latest_call_id
+                    previous_calls[username] = latest_call_id
             
         except requests.exceptions.RequestException as req_err:
             print(f"Request exception occurred for {username}: {req_err}")
