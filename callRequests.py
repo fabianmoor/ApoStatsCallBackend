@@ -126,12 +126,12 @@ def change_date():
 
 @app.route('/get_all_calls', methods=['GET'])
 def get_all_calls():
-    global today_date, all_calls
+    global today_date
+    all_user_calls = countCallsForAllUsers()
     if today_date != getCurrentDate():
         today_date = getCurrentDate()
-        for username in all_calls:
-            all_calls[username] = 0
-    all_user_calls = countCallsForAllUsers()
+        for username in all_user_calls:
+            all_user_calls[username] = 0
     # TEST
     response = make_response(jsonify(all_user_calls))
     # TEST
