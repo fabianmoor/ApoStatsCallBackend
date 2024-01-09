@@ -16,7 +16,11 @@ origins = [
         "http://localhost:3000"
         ]
 
-cors = CORS(app, resources={r"/get_all_calls": {"origins": origins}})
+cors = CORS(app, resources={
+    r"/get_all_calls": {"origins": origins},
+    r"/get_fabian": {"origins": origins},
+    r"/change_date": {"origins": origins},
+    })
 
 _INITJULIA = 0
 _INITMILLA = 0
@@ -106,6 +110,19 @@ def countCallsForAllUsers():
             all_calls[username] = 0
         
     return all_calls
+
+
+@app.route('/get_fabian', methods=['GET'])
+def get_fabian():
+    global all_calls
+    all_calls['FABIAN'] += 1
+    return "Finish"
+
+@app.route('/change_date', methods=['GET'])
+def change_date():
+    global today_date
+    today_date = "2024-01-10"
+    return "Date Changed"
 
 @app.route('/get_all_calls', methods=['GET'])
 def get_all_calls():
