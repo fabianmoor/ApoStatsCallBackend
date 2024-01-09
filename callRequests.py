@@ -78,9 +78,14 @@ def getCurrentDate():
 
 today_date = getCurrentDate()
 
-def countCallsForAllUsers():
-    global today_date, all_calls, previous_calls
-    for username, user_id in UsersKundtjanst.items():
+@app.route('/get_all_calls', methods=['GET'])
+def get_all_calls():
+    global today_date, previous_calls, UsersAPI
+
+    # Function to count calls for a specific user
+    def count_calls(username, user_id):
+        nonlocal today_date, previous_calls
+
         USER_API = UsersAPI.get(user_id)
         headers = {
             "Authorization": f"Bearer {USER_API}",
@@ -89,6 +94,7 @@ def countCallsForAllUsers():
             "fromDate": getCurrentDate(),
             "toDate": getCurrentDate(),
         }
+
         try:
             response = requests.get("https://api.telavox.se/calls", headers=headers, params=params)
             response.raise_for_status()
@@ -97,15 +103,28 @@ def countCallsForAllUsers():
             if incoming_calls:
                 latest_call_id = incoming_calls[0]['callId']
                 if previous_calls[username] != latest_call_id:
-                    all_calls[username] += 1
-                    print(f"{username} took a call. Added one call.")
                     previous_calls[username] = latest_call_id
-            
+                    return 1  # Increment call count for the user
         except requests.exceptions.RequestException as req_err:
             print(f"Request exception occurred for {username}: {req_err}")
-        
-    return all_calls
+        return 0  # Return 0 if no new call
 
+    # Count calls for all users
+    all_user_calls = {}
+    for username, user_id in UsersKundtjanst.items():
+        all_user_calls[username] = count_calls(username, user_id)
+
+    global today_date
+    
+    if today_date != getCurrentDate():
+        today_date = getCurrentDate()
+        for username in all_calls:
+            all_calls[username] = 0
+
+    response = make_response(jsonify(all_user_calls))
+    response.headers['Access-Control-Allow-Origin'] = 'https://apo-ex-call-stats.vercel.app'
+    print(all_user_calls)
+    return jsonify(all_user_calls)
 
 @app.route('/get_fabian', methods=['GET'])
 def get_fabian():
@@ -118,22 +137,6 @@ def change_date():
     global today_date
     today_date = "2024-01-10"
     return "Date Changed"
-
-@app.route('/get_all_calls', methods=['GET'])
-def get_all_calls():
-    global today_date
-    all_user_calls = countCallsForAllUsers()
-    if today_date != getCurrentDate():
-        today_date = getCurrentDate()
-        for username in all_calls:
-            all_calls[username] = 0
-    # TEST
-    response = make_response(jsonify(all_user_calls))
-    # TEST
-    response.headers['Access-Control-Allow-Origin'] = 'https://apo-ex-call-stats.vercel.app'
-    print(all_user_calls)
-    print(all_calls)
-    return jsonify(all_user_calls)
 
 if __name__ == '__main__':
     app.run(debug=True)  # Run the Flask app in debug mode
