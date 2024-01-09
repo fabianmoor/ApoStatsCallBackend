@@ -1,6 +1,7 @@
 import requests
 import os
 from datetime import datetime
+import pytz
 from flask import Flask, jsonify
 from flask_cors import CORS
 # TEST
@@ -21,6 +22,10 @@ cors = CORS(app, resources={
     r"/get_fabian": {"origins": origins},
     r"/change_date": {"origins": origins},
     })
+
+
+
+tz = pytz.timezone('Europe/Stockholm')
 
 all_calls = {
     "JULIA": 0,
@@ -58,7 +63,7 @@ def clear_calls():
         all_calls[i] = 0
 
 def getCurrentDate():
-    current_date = datetime.now()
+    current_date = datetime.now(tz)
     todayDate = current_date.strftime('%Y-%m-%d')
     return todayDate
 
