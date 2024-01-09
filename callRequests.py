@@ -22,11 +22,15 @@ cors = CORS(app, resources={
     r"/change_date": {"origins": origins},
     })
 
-_INITJULIA = 0
-_INITMILLA = 0
-_INITVALDEMAR = 0
-_INITSOFIA = 0
-_INITFABIAN = 0
+all_calls = {
+    "JULIA": 0,
+    "MILLA": 0,
+    "VALDEMAR": 0,
+    "SOFIA": 0,
+    "FABIAN": 0,
+}
+
+previous_calls = {user: None for user in all_calls}
 
 UsersKundtjanst = {
     "JULIA": "0104102466",
@@ -37,37 +41,19 @@ UsersKundtjanst = {
 }
 
 UsersAPI = {
-        #"0104104956": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJzdWIiOiI1MzY3OTU3IiwiYXVkIjoiKiIsImlzcyI6InR2eCIsImlhdCI6MTcwNDI3Mjk4OSwianRpIjoiMTQzMjEzNjIifQ.1y2DuYqnePo8vYMfOor7sfS9OhOidLOhUEJstW90_pFvVHR7PrCkVx5MT-W2-GVumuYFcdFyH4vtZA9yyGIAVg",
     "0104104956": os.environ['TELAVOX_API_KEY_FABIAN'],
-    #"0104102466": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJzdWIiOiI1MzE3NDUxIiwiYXVkIjoiKiIsImlzcyI6InR2eCIsImlhdCI6MTcwNDIwODYyNywianRpIjoiMTQyNzcwMjMifQ.gYRDeaaq93rLBjFnJL_t8_1gmztUwiYU7MYjxkFYVHuAdUjxov7Fl3fNw37XssjHhtlZezQSsGDSTk318Ykhwg",
     "0104102466": os.environ['TELAVOX_API_KEY_JULIA'],
-    #"0104102496": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJzdWIiOiI1MzE3NDg0IiwiYXVkIjoiKiIsImlzcyI6InR2eCIsImlhdCI6MTcwMzg0NTI1NSwianRpIjoiMTQwMjY2MDQifQ.Q_G41EqslClMFoAB1uaAuM67sjGtbHv944S32sY67ZcIsJD32ocDHabjsXK7uzTRjVCEFDaVDiwdSOppWN6zhQ",
     "0104102496": os.environ['TELAVOX_API_KEY_SOFIA'],    
-    #"0104102495": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJzdWIiOiI1MzE3NDgxIiwiYXVkIjoiKiIsImlzcyI6InR2eCIsImlhdCI6MTcwMzg1MjE5OCwianRpIjoiMTQwMzEzODQifQ.rNpMePUxpdGV6umE7KzNudSrgL5WnCoVF8B2s228VxHZGdOU6tR4WCn602LQkT_grhTGdW7dq_vv3BwrEesW9A",
     "0104102495": os.environ['TELAVOX_API_KEY_VALDEMAR'],    
-
     "0104104951": os.environ['TELAVOX_API_KEY_MILLA'],
 }
-
-previous_calls = {
-    "JULIA": None,
-    "MILLA": None,
-    "VALDEMAR": None,
-    "SOFIA": None,
-    "FABIAN": None,
-}
-
-all_calls = {
-    "JULIA": _INITJULIA,
-    "MILLA": _INITMILLA,
-    "VALDEMAR": _INITVALDEMAR,
-    "SOFIA": _INITSOFIA,
-    "FABIAN": _INITFABIAN,
-}
-
-
+    #"0104104956": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJzdWIiOiI1MzY3OTU3IiwiYXVkIjoiKiIsImlzcyI6InR2eCIsImlhdCI6MTcwNDI3Mjk4OSwianRpIjoiMTQzMjEzNjIifQ.1y2DuYqnePo8vYMfOor7sfS9OhOidLOhUEJstW90_pFvVHR7PrCkVx5MT-W2-GVumuYFcdFyH4vtZA9yyGIAVg",
+    #"0104102466": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJzdWIiOiI1MzE3NDUxIiwiYXVkIjoiKiIsImlzcyI6InR2eCIsImlhdCI6MTcwNDIwODYyNywianRpIjoiMTQyNzcwMjMifQ.gYRDeaaq93rLBjFnJL_t8_1gmztUwiYU7MYjxkFYVHuAdUjxov7Fl3fNw37XssjHhtlZezQSsGDSTk318Ykhwg",
+    #"0104102496": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJzdWIiOiI1MzE3NDg0IiwiYXVkIjoiKiIsImlzcyI6InR2eCIsImlhdCI6MTcwMzg0NTI1NSwianRpIjoiMTQwMjY2MDQifQ.Q_G41EqslClMFoAB1uaAuM67sjGtbHv944S32sY67ZcIsJD32ocDHabjsXK7uzTRjVCEFDaVDiwdSOppWN6zhQ",
+    #"0104102495": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJzdWIiOiI1MzE3NDgxIiwiYXVkIjoiKiIsImlzcyI6InR2eCIsImlhdCI6MTcwMzg1MjE5OCwianRpIjoiMTQwMzEzODQifQ.rNpMePUxpdGV6umE7KzNudSrgL5WnCoVF8B2s228VxHZGdOU6tR4WCn602LQkT_grhTGdW7dq_vv3BwrEesW9A",
+    
 def clear_calls():
-    global all_user
+    global all_calls
     for i in all_calls:
         all_calls[i] = 0
 
