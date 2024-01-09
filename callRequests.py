@@ -126,7 +126,7 @@ def change_date():
 
 @app.route('/get_all_calls', methods=['GET'])
 def get_all_calls():
-    global today_date
+    global today_date, all_calls
     if today_date != getCurrentDate():
         today_date = getCurrentDate()
         for username in all_calls:
