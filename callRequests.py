@@ -63,6 +63,7 @@ def clear_calls():
         all_calls[i] = 0
 
 def getCurrentDate():
+    global tz
     current_date = datetime.now(tz)
     todayDate = current_date.strftime('%Y-%m-%d')
     return todayDate
