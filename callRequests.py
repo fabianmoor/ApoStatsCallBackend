@@ -103,11 +103,6 @@ def countCallsForAllUsers():
             
         except requests.exceptions.RequestException as req_err:
             print(f"Request exception occurred for {username}: {req_err}")
-            
-    if today_date != getCurrentDate():
-        today_date = getCurrentDate()
-        for username in all_calls:
-            all_calls[username] = 0
         
     return all_calls
 
@@ -130,12 +125,14 @@ def get_all_calls():
     all_user_calls = countCallsForAllUsers()
     if today_date != getCurrentDate():
         today_date = getCurrentDate()
-        for username in all_user_calls:
-            all_user_calls[username] = 0
+        for username in all_calls:
+            all_calls[username] = 0
     # TEST
     response = make_response(jsonify(all_user_calls))
     # TEST
     response.headers['Access-Control-Allow-Origin'] = 'https://apo-ex-call-stats.vercel.app'
+    print(all_user_calls)
+    print(all_calls)
     return jsonify(all_user_calls)
 
 if __name__ == '__main__':
