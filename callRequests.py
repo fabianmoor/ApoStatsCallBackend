@@ -109,6 +109,7 @@ def countCallsForAllUsers():
 
 @app.route('/get_all_calls', methods=['GET'])
 def get_all_calls():
+    global today_date
     all_user_calls = countCallsForAllUsers()
     # TEST
     response = make_response(jsonify(all_user_calls))
