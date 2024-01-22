@@ -5,8 +5,11 @@ from flask import Flask, jsonify, make_response
 from flask_cors import CORS
 import queue
 import threading
+from celery import Celery
 
 app = Flask(__name__)
+celery = Celery(__name__, broker='redis://localhost:6379/0')
+celery.conf.update(app.config)
 
 origins = [
         "https://apostats.vercel.app",
@@ -53,6 +56,7 @@ UsersAPI = {
     #"0104102496": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJzdWIiOiI1MzE3NDg0IiwiYXVkIjoiKiIsImlzcyI6InR2eCIsImlhdCI6MTcwMzg0NTI1NSwianRpIjoiMTQwMjY2MDQifQ.Q_G41EqslClMFoAB1uaAuM67sjGtbHv944S32sY67ZcIsJD32ocDHabjsXK7uzTRjVCEFDaVDiwdSOppWN6zhQ",
     #"0104102495": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJzdWIiOiI1MzE3NDgxIiwiYXVkIjoiKiIsImlzcyI6InR2eCIsImlhdCI6MTcwMzg1MjE5OCwianRpIjoiMTQwMzEzODQifQ.rNpMePUxpdGV6umE7KzNudSrgL5WnCoVF8B2s228VxHZGdOU6tR4WCn602LQkT_grhTGdW7dq_vv3BwrEesW9A",
 
+@celery.task
 def process_calls():
     global all_calls
     while True:
@@ -79,7 +83,8 @@ def getCurrentDate():
 
 today_date = getCurrentDate()
 
-def countCallsForAllUsers():
+@celery.task
+def count_calls_for_all_users():
     global today_date, previous_calls
     for username, user_id in UsersKundtjanst.items():
         USER_API = UsersAPI.get(user_id)
@@ -129,7 +134,9 @@ def get_all_calls():
         for username in all_calls:
             all_calls[username] = 0
             
-    all_user_calls = countCallsForAllUsers()
+    count_calls_for_all_users.delay()
+
+    all_user_calls = count_calls_for_all_users()
     # TEST
     response = make_response(jsonify(all_user_calls))
     # TEST
