@@ -132,7 +132,8 @@ def get_all_calls():
     # TEST
     response = make_response(jsonify(all_user_calls))
     # TEST
-    response.headers['Access-Control-Allow-Origin'] = 'https://apo-ex-call-stats.vercel.app'
+    #response.headers['Access-Control-Allow-Origin'] = 'https://apo-ex-call-stats.vercel.app'
+    response.headers['Access-Control-Allow-Origin'] = 'https://apostats.vercel.app'
     print(all_user_calls)
     print(all_calls)
     return jsonify(all_user_calls)
