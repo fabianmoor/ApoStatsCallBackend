@@ -13,11 +13,7 @@ origins = [
         "http://localhost:3000"
         ]
 
-cors = CORS(app, resources={
-    r"/get_all_calls": {"origins": origins},
-    r"/get_fabian": {"origins": origins},
-    r"/change_date": {"origins": origins},
-    })
+cors = CORS(app, resources={r"*": {"origins": origins}})
 
 all_calls = {
     "JULIA": 0,
