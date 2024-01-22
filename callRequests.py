@@ -10,10 +10,15 @@ app = Flask(__name__)
 
 origins = [
         "https://apostats.vercel.app",
-        "http://localhost:3000"
+        "http://localhost:3000",
+        "https://apo-ex-call-stats.vercel.app"
         ]
 
-cors = CORS(app, resources={r"*": {"origins": origins}})
+cors = CORS(app, resources={
+    r"/get_all_calls": {"origins": origins},
+    r"/get_fabian": {"origins": origins},
+    r"/change_date": {"origins": origins},
+})
 
 all_calls = {
     "JULIA": 0,
