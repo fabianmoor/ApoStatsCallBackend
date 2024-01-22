@@ -1,13 +1,10 @@
 import requests
 import os
 from datetime import datetime
-from flask import Flask, jsonify
+from flask import Flask, jsonify, make_response
 from flask_cors import CORS
-# TEST
-from flask import make_response
-
-#app = Flask(__name__)
-#CORS(app)
+import queue
+import threading
 
 app = Flask(__name__)
 
@@ -30,6 +27,9 @@ all_calls = {
     "FABIAN": 0,
 }
 
+call_queue = queue.Queue()
+lock = threading.Lock()
+
 previous_calls = {user: None for user in all_calls}
 
 UsersKundtjanst = {
@@ -51,6 +51,20 @@ UsersAPI = {
     #"0104102466": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJzdWIiOiI1MzE3NDUxIiwiYXVkIjoiKiIsImlzcyI6InR2eCIsImlhdCI6MTcwNDIwODYyNywianRpIjoiMTQyNzcwMjMifQ.gYRDeaaq93rLBjFnJL_t8_1gmztUwiYU7MYjxkFYVHuAdUjxov7Fl3fNw37XssjHhtlZezQSsGDSTk318Ykhwg",
     #"0104102496": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJzdWIiOiI1MzE3NDg0IiwiYXVkIjoiKiIsImlzcyI6InR2eCIsImlhdCI6MTcwMzg0NTI1NSwianRpIjoiMTQwMjY2MDQifQ.Q_G41EqslClMFoAB1uaAuM67sjGtbHv944S32sY67ZcIsJD32ocDHabjsXK7uzTRjVCEFDaVDiwdSOppWN6zhQ",
     #"0104102495": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJzdWIiOiI1MzE3NDgxIiwiYXVkIjoiKiIsImlzcyI6InR2eCIsImlhdCI6MTcwMzg1MjE5OCwianRpIjoiMTQwMzEzODQifQ.rNpMePUxpdGV6umE7KzNudSrgL5WnCoVF8B2s228VxHZGdOU6tR4WCn602LQkT_grhTGdW7dq_vv3BwrEesW9A",
+
+def process_calls():
+    global all_calls
+    while True:
+        call = call_queue.get()
+        if call is None:
+            break
+        username = call['username']
+        with lock:
+            all_calls[username] += 1
+        print(f"{username} took a call. Added one call.")
+
+process_thread = threading.Thread(target=process_calls)
+process_thread.start()
     
 def clear_calls():
     global all_calls
@@ -65,7 +79,7 @@ def getCurrentDate():
 today_date = getCurrentDate()
 
 def countCallsForAllUsers():
-    global today_date, all_calls, previous_calls
+    global today_date, previous_calls
     for username, user_id in UsersKundtjanst.items():
         USER_API = UsersAPI.get(user_id)
         headers = {
@@ -83,8 +97,7 @@ def countCallsForAllUsers():
             if incoming_calls:
                 latest_call_id = incoming_calls[0]['callId']
                 if previous_calls[username] != latest_call_id:
-                    all_calls[username] += 1
-                    print(f"{username} took a call. Added one call.")
+                    call_queue.put({'username': username})
                     previous_calls[username] = latest_call_id
             
         except requests.exceptions.RequestException as req_err:
