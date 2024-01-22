@@ -2,7 +2,6 @@ import requests
 import os
 from datetime import datetime
 from flask import Flask, jsonify, make_response
-from flask_cache import Cache
 from flask_cors import CORS
 import queue
 import threading
@@ -80,7 +79,6 @@ def getCurrentDate():
 
 today_date = getCurrentDate()
 
-@cache.cached(timeout=60)
 def countCallsForAllUsers():
     global today_date, previous_calls
     for username, user_id in UsersKundtjanst.items():
