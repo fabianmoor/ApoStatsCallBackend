@@ -1,38 +1,35 @@
 import requests
 import os
 from datetime import datetime
-from flask import Flask, jsonify, make_response
+from flask import Flask, jsonify
 from flask_cors import CORS
-import queue
-import threading
-from celery import Celery
+# TEST
+from flask import make_response
+import json
+
+#app = Flask(__name__)
+#CORS(app)
 
 app = Flask(__name__)
-celery = Celery(__name__, broker='redis://localhost:6379/0')
-celery.conf.update(app.config)
 
 origins = [
         "https://apostats.vercel.app",
-        "http://localhost:3000",
-        "https://apo-ex-call-stats.vercel.app"
+        "http://localhost:3000"
         ]
 
 cors = CORS(app, resources={
     r"/get_all_calls": {"origins": origins},
     r"/get_fabian": {"origins": origins},
     r"/change_date": {"origins": origins},
-})
+    })
 
 all_calls = {
-    "JULIA": 0,
-    "MILLA": 0,
-    "VALDEMAR": 0,
-    "SOFIA": 0,
-    "FABIAN": 0,
+    "JULIA": 24-1,
+    "MILLA": 27-1,
+    "VALDEMAR": 19-1,
+    "SOFIA": 21-1,
+    "FABIAN": 20-1,
 }
-
-call_queue = queue.Queue()
-lock = threading.Lock()
 
 previous_calls = {user: None for user in all_calls}
 
@@ -55,21 +52,6 @@ UsersAPI = {
     #"0104102466": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJzdWIiOiI1MzE3NDUxIiwiYXVkIjoiKiIsImlzcyI6InR2eCIsImlhdCI6MTcwNDIwODYyNywianRpIjoiMTQyNzcwMjMifQ.gYRDeaaq93rLBjFnJL_t8_1gmztUwiYU7MYjxkFYVHuAdUjxov7Fl3fNw37XssjHhtlZezQSsGDSTk318Ykhwg",
     #"0104102496": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJzdWIiOiI1MzE3NDg0IiwiYXVkIjoiKiIsImlzcyI6InR2eCIsImlhdCI6MTcwMzg0NTI1NSwianRpIjoiMTQwMjY2MDQifQ.Q_G41EqslClMFoAB1uaAuM67sjGtbHv944S32sY67ZcIsJD32ocDHabjsXK7uzTRjVCEFDaVDiwdSOppWN6zhQ",
     #"0104102495": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJzdWIiOiI1MzE3NDgxIiwiYXVkIjoiKiIsImlzcyI6InR2eCIsImlhdCI6MTcwMzg1MjE5OCwianRpIjoiMTQwMzEzODQifQ.rNpMePUxpdGV6umE7KzNudSrgL5WnCoVF8B2s228VxHZGdOU6tR4WCn602LQkT_grhTGdW7dq_vv3BwrEesW9A",
-
-@celery.task
-def process_calls():
-    global all_calls
-    while True:
-        call = call_queue.get()
-        if call is None:
-            break
-        username = call['username']
-        with lock:
-            all_calls[username] += 1
-        print(f"{username} took a call. Added one call.")
-
-process_thread = threading.Thread(target=process_calls)
-process_thread.start()
     
 def clear_calls():
     global all_calls
@@ -83,9 +65,8 @@ def getCurrentDate():
 
 today_date = getCurrentDate()
 
-@celery.task
-def count_calls_for_all_users():
-    global today_date, previous_calls
+def countCallsForAllUsers():
+    global today_date, all_calls, previous_calls
     for username, user_id in UsersKundtjanst.items():
         USER_API = UsersAPI.get(user_id)
         headers = {
@@ -103,7 +84,8 @@ def count_calls_for_all_users():
             if incoming_calls:
                 latest_call_id = incoming_calls[0]['callId']
                 if previous_calls[username] != latest_call_id:
-                    call_queue.put({'username': username})
+                    all_calls[username] += 1
+                    print(f"{username} took a call. Added one call.")
                     previous_calls[username] = latest_call_id
             
         except requests.exceptions.RequestException as req_err:
@@ -111,6 +93,9 @@ def count_calls_for_all_users():
         
     return all_calls
 
+
+def is_sum_greater(data):
+    return sum(data.values())
 
 @app.route('/get_fabian', methods=['GET'])
 def get_fabian():
@@ -134,17 +119,18 @@ def get_all_calls():
         for username in all_calls:
             all_calls[username] = 0
             
-    count_calls_for_all_users.delay()
-
-    all_user_calls = count_calls_for_all_users()
-    # TEST
-    response = make_response(jsonify(all_user_calls))
-    # TEST
-    response.headers['Access-Control-Allow-Origin'] = 'https://apo-ex-call-stats.vercel.app'
-    #response.headers['Access-Control-Allow-Origin'] = 'https://apostats.vercel.app'
-    print(all_user_calls)
-    print(all_calls)
-    return jsonify(all_user_calls)
+    all_user_calls = countCallsForAllUsers()
+    
+    try:
+        if is_sum_greater(all_user_calls) > is_sum_greater(previous_sum):
+            return all_user_calls
+        elif is_sum_greater(all_user_calls) < is_sum_greater(previous_sum):
+            print("Woops, the json got fucked, but was luckily saved by the exception.")
+            return previous_sum
+    except NameError:
+        previous_sum = all_user_calls
+        return all_user_calls
 
 if __name__ == '__main__':
     app.run(debug=True)  # Run the Flask app in debug mode
+    # updat2
