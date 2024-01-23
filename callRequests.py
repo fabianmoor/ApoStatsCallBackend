@@ -24,11 +24,11 @@ cors = CORS(app, resources={
     })
 
 all_calls = {
-    "JULIA": 24-1,
-    "MILLA": 27-1,
-    "VALDEMAR": 19-1,
-    "SOFIA": 21-1,
-    "FABIAN": 20-1,
+    "JULIA": 0,
+    "MILLA": 0,
+    "VALDEMAR": 0,
+    "SOFIA": 0,
+    "FABIAN": 0,
 }
 
 previous_calls = {user: None for user in all_calls}
