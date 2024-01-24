@@ -21,12 +21,14 @@ cors = CORS(app, resources={
     })
 
 all_calls = {
-    "JULIA": 4-1,
+    "JULIA": 6-1,
     "MILLA": 6-1,
-    "VALDEMAR": 6-1,
-    "SOFIA": 2-1,
-    "FABIAN": 5-1,
+    "VALDEMAR": 7-1,
+    "SOFIA": 4-1,
+    "FABIAN": 6-1,
 }
+
+
 
 UsersKundtjanst = {
     "JULIA": "0104102466",
@@ -105,6 +107,8 @@ def change_date():
     global today_date
     today_date = "2024-01-10"
     return "Date Changed"
+
+previous_sum = 0
 
 @app.route('/get_all_calls', methods=['GET'])
 def get_all_calls():
