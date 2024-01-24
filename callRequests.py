@@ -3,12 +3,9 @@ import os
 from datetime import datetime
 from flask import Flask, jsonify
 from flask_cors import CORS
-# TEST
 from flask import make_response
 import json
 
-#app = Flask(__name__)
-#CORS(app)
 
 app = Flask(__name__)
 
@@ -24,14 +21,12 @@ cors = CORS(app, resources={
     })
 
 all_calls = {
-    "JULIA": 0,
-    "MILLA": 0,
-    "VALDEMAR": 0,
-    "SOFIA": 0,
-    "FABIAN": 0,
+    "JULIA": 4-1,
+    "MILLA": 6-1,
+    "VALDEMAR": 6-1,
+    "SOFIA": 2-1,
+    "FABIAN": 5-1,
 }
-
-previous_calls = {user: None for user in all_calls}
 
 UsersKundtjanst = {
     "JULIA": "0104102466",
@@ -48,10 +43,6 @@ UsersAPI = {
     "0104102495": os.environ['TELAVOX_API_KEY_VALDEMAR'],    
     "0104104951": os.environ['TELAVOX_API_KEY_MILLA'],
 }
-    #"0104104956": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJzdWIiOiI1MzY3OTU3IiwiYXVkIjoiKiIsImlzcyI6InR2eCIsImlhdCI6MTcwNDI3Mjk4OSwianRpIjoiMTQzMjEzNjIifQ.1y2DuYqnePo8vYMfOor7sfS9OhOidLOhUEJstW90_pFvVHR7PrCkVx5MT-W2-GVumuYFcdFyH4vtZA9yyGIAVg",
-    #"0104102466": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJzdWIiOiI1MzE3NDUxIiwiYXVkIjoiKiIsImlzcyI6InR2eCIsImlhdCI6MTcwNDIwODYyNywianRpIjoiMTQyNzcwMjMifQ.gYRDeaaq93rLBjFnJL_t8_1gmztUwiYU7MYjxkFYVHuAdUjxov7Fl3fNw37XssjHhtlZezQSsGDSTk318Ykhwg",
-    #"0104102496": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJzdWIiOiI1MzE3NDg0IiwiYXVkIjoiKiIsImlzcyI6InR2eCIsImlhdCI6MTcwMzg0NTI1NSwianRpIjoiMTQwMjY2MDQifQ.Q_G41EqslClMFoAB1uaAuM67sjGtbHv944S32sY67ZcIsJD32ocDHabjsXK7uzTRjVCEFDaVDiwdSOppWN6zhQ",
-    #"0104102495": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJzdWIiOiI1MzE3NDgxIiwiYXVkIjoiKiIsImlzcyI6InR2eCIsImlhdCI6MTcwMzg1MjE5OCwianRpIjoiMTQwMzEzODQifQ.rNpMePUxpdGV6umE7KzNudSrgL5WnCoVF8B2s228VxHZGdOU6tR4WCn602LQkT_grhTGdW7dq_vv3BwrEesW9A",
     
 def clear_calls():
     global all_calls
@@ -63,7 +54,6 @@ def getCurrentDate():
     todayDate = current_date.strftime('%Y-%m-%d')
     return todayDate
 
-today_date = getCurrentDate()
 
 def countCallsForAllUsers():
     global today_date, all_calls, previous_calls
@@ -93,10 +83,17 @@ def countCallsForAllUsers():
         
     return all_calls
 
-
 def is_sum_greater(data):
     return sum(data.values())
 
+
+
+# Setting previous_calls & today_date
+previous_calls = {user: None for user in all_calls}
+today_date = getCurrentDate()
+
+
+# app.routes
 @app.route('/get_fabian', methods=['GET'])
 def get_fabian():
     global all_calls
@@ -132,5 +129,4 @@ def get_all_calls():
         return all_user_calls
 
 if __name__ == '__main__':
-    app.run(debug=True)  # Run the Flask app in debug mode
-    # updat2
+    app.run(debug=True)
