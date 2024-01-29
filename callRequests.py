@@ -21,11 +21,11 @@ cors = CORS(app, resources={
     })
 
 all_calls = {
-    "JULIA": 0,
-    "MILLA": 0,
-    "VALDEMAR": 0,
-    "SOFIA": 0,
-    "FABIAN": 0,
+    "JULIA": 17-1,
+    "MILLA": 14-1,
+    "VALDEMAR": 16-1,
+    "SOFIA": 19-1,
+    "FABIAN": 14-1,
 }
 
 
@@ -128,6 +128,7 @@ def get_all_calls():
         elif is_sum_greater(all_user_calls) < is_sum_greater(previous_sum):
             print("Woops, the json got fucked, but was luckily saved by the exception.")
             return previous_sum
+                
     except NameError:
         previous_sum = all_user_calls
         return all_user_calls
