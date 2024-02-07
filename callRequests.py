@@ -24,8 +24,8 @@ all_calls = {
     "JULIA": 2-1,
     "MILLA": 3-1,
     "VALDEMAR": 4-1,
-    "SOFIA": 0-1,
-    "FABIAN": 4-1,
+    "SOFIA": 0,
+    "FABIAN": 5-1,
 }
 
 
