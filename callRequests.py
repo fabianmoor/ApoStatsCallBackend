@@ -21,11 +21,11 @@ cors = CORS(app, resources={
     })
 
 all_calls = {
-    "JULIA": 2-1,
-    "MILLA": 3-1,
-    "VALDEMAR": 4-1,
-    "SOFIA": 0,
-    "FABIAN": 5-1,
+    "JULIA": 21-1,
+    "MILLA": 19-1,
+    "VALDEMAR": 21-1,
+    "SOFIA": 16,
+    "FABIAN": 15-1,
 }
 
 
