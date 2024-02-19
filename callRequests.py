@@ -41,9 +41,9 @@ cur = conn.cursor()
 app = Flask(__name__)
 
 origins = [
-        "https://apostats.vercel.app",
-        "http://localhost:3000"
-        ]
+    "https://apostats.vercel.app",
+    "http://localhost:3000"
+    ]
 
 cors = CORS(app, resources={
     r"/get_all_calls": {"origins": origins},
@@ -94,7 +94,7 @@ def add_one_call(username):
     SET calls_count = calls_count + 1
     WHERE username = %s;
     """
-    cur.execute(update_sql, (username,))
+    cur.execute(update_sql, (str(username)))
     conn.commit()
     return 0
 
@@ -104,8 +104,7 @@ def update_prev(username, prev_id):
     SET previous_id = %s
     WHERE username = %s;
     """
-
-    cur.execute(update_prev, (username, prev_id))
+    cur.execute(update_prev, (str(username), str(prev_id)))
     conn.commit()
     return 0
 
@@ -114,7 +113,7 @@ def check_prev(username):
     SELECT previous_id FROM user_calls WHERE username = %s;
     """
     try:
-        cur.execute(check_prev, (username,))
+        cur.execute(check_prev, (str(username)))
         result = cur.fetchone()
         if result is not None:
             print(f"User {username} has {result[0]}")
