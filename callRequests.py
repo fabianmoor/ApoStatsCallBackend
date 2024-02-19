@@ -94,7 +94,7 @@ def add_one_call(username):
     SET calls_count = calls_count + 1
     WHERE username = %s;
     """
-    cur.execute(update_sql, (str(username)))
+    print(cur.execute(update_sql, (username,)))
     conn.commit()
     return 0
 
@@ -104,7 +104,7 @@ def update_prev(username, prev_id):
     SET previous_id = %s
     WHERE username = %s;
     """
-    cur.execute(update_prev, (str(username), str(prev_id)))
+    cur.execute(update_prev, (prev_id, username,))
     conn.commit()
     return 0
 
@@ -113,7 +113,7 @@ def check_prev(username):
     SELECT previous_id FROM user_calls WHERE username = %s;
     """
     try:
-        cur.execute(check_prev, (str(username)))
+        cur.execute(check_prev, (username,))
         result = cur.fetchone()
         if result is not None:
             print(f"User {username} has {result[0]}")
@@ -153,10 +153,12 @@ def countCallsForAllUsers():
 
             if incoming_calls:
                 latest_call_id = incoming_calls[0]['callId']
+                print(latest_call_id)
                 if check_prev(username) != latest_call_id:
                     add_one_call(username)
                     print(f"{username} took a call. Added one call.")
                     update_prev(username, latest_call_id)
+                    print(latest_call_id)
             
         except requests.exceptions.RequestException as req_err:
             print(f"Request exception occurred for {username}: {req_err}")
@@ -198,6 +200,7 @@ def get_all_calls():
         cur.execute("UPDATE user_calls SET calls_count =0;")
         conn.commit()
             
+    countCallsForAllUsers()
     cur.execute("SELECT username, calls_count FROM user_calls;")
 
     user_calls = cur.fetchall()
