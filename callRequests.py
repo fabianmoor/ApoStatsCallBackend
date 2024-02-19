@@ -4,7 +4,38 @@ from datetime import datetime
 from flask import Flask, jsonify
 from flask_cors import CORS
 from flask import make_response
+from urllib.parse import urlparse
 import json
+import psycopg2
+
+
+
+# Parse service url
+service_url = os.getenv('DATABASE_URL')
+result = urlparse(service_url)
+username = result.username
+password = result.password
+database = result.path[1:]
+hostname = result.hostname
+port = result.port
+
+# Connect to the database
+conn = psycopg2.connect(
+    dbname=database,
+    user=username,
+    password=password,
+    host=hostname,
+    port=port
+)
+
+cur = conn.cursor()
+
+
+
+
+
+
+
 
 
 app = Flask(__name__)
@@ -56,9 +87,57 @@ def getCurrentDate():
     todayDate = current_date.strftime('%Y-%m-%d')
     return todayDate
 
+# DB-funcs
+def add_one_call(username):
+    update_sql = """
+    UPDATE user_calls
+    SET calls_count = calls_count + 1
+    WHERE username = %s;
+    """
+    cur.execute(update_sql, (username,))
+    conn.commit()
+    return 0
+
+def update_prev(username, prev_id):
+    update_prev = """
+    UPDATE user_calls
+    SET previous_calls = %s
+    WHERE username = %s;
+    """
+
+    cur.execute(update_prev, (username, prev_id))
+    conn.commit()
+    return 0
+
+def check_prev(username):
+    check_prev = """
+    SELECT previous_id FROM user_calls WHERE username = %s;
+    """
+    try:
+        cur.execute(check_prev, (username,))
+        result = cur.fetchone()
+        if result is not None:
+            print(f"User {username} has {result[0]}")
+            return result[0]
+        else:
+            print(f"User {username} not found")
+            return None
+    except Exception as e:
+        print(f"An error occured: {e}")
+        return None
+
+
+def fetch_all_db_calls():
+    fetch_db_calls = """
+    SELECT username, calls_count FROM user_calls;
+    """
+    cur.execute(fetch_db_calls)
+    conn.commit()
+    return 0
+
 
 def countCallsForAllUsers():
-    global today_date, all_calls, previous_calls
+    global today_date
     for username, user_id in UsersKundtjanst.items():
         USER_API = UsersAPI.get(user_id)
         headers = {
@@ -75,31 +154,31 @@ def countCallsForAllUsers():
 
             if incoming_calls:
                 latest_call_id = incoming_calls[0]['callId']
-                if previous_calls[username] != latest_call_id:
-                    all_calls[username] += 1
+                if check_prev(username) != latest_call_id:
+                    add_one_call(username)
                     print(f"{username} took a call. Added one call.")
-                    previous_calls[username] = latest_call_id
+                    update_prev(username, latest_call_id)
             
         except requests.exceptions.RequestException as req_err:
             print(f"Request exception occurred for {username}: {req_err}")
+            return 209
         
-    return all_calls
+    return 0
 
 def is_sum_greater(data):
     return sum(data.values())
 
 
+    
+
 
 # Setting previous_calls & today_date
-previous_calls = {user: None for user in all_calls}
 today_date = getCurrentDate()
-
 
 # app.routes
 @app.route('/get_fabian', methods=['GET'])
 def get_fabian():
-    global all_calls
-    all_calls['FABIAN'] += 1
+    add_one_call("FABIAN")
     return "Finish"
 
 @app.route('/change_date', methods=['GET'])
@@ -117,21 +196,15 @@ def get_all_calls():
     print(getCurrentDate())
     if today_date != getCurrentDate():
         today_date = getCurrentDate()
-        for username in all_calls:
-            all_calls[username] = 0
+        cur.execute("UPDATE user_calls SET calls_count =0;")
+        conn.commit()
             
-    all_user_calls = countCallsForAllUsers()
-    
-    try:
-        if is_sum_greater(all_user_calls) > is_sum_greater(previous_sum):
-            return all_user_calls
-        elif is_sum_greater(all_user_calls) < is_sum_greater(previous_sum):
-            print("Woops, the json got fucked, but was luckily saved by the exception.")
-            return previous_sum
-                
-    except NameError:
-        previous_sum = all_user_calls
-        return all_user_calls
+    cur.execute("SELECT username, calls_count FROM user_calls;")
 
+    user_calls = cur.fetchall()
+
+    calls_dict = {username: calls_count for username, calls_count in user_calls}
+
+    return jsonify(calls_dict)
 if __name__ == '__main__':
     app.run(debug=True)
