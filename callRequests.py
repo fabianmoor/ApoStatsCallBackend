@@ -101,7 +101,7 @@ def add_one_call(username):
 def update_prev(username, prev_id):
     update_prev = """
     UPDATE user_calls
-    SET previous_calls = %s
+    SET previous_id = %s
     WHERE username = %s;
     """
 
