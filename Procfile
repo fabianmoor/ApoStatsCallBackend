@@ -1,1 +1,1 @@
-web: gunicorn callRequests:app
+web: python3 callRequests.py
