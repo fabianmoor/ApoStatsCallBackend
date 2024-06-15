@@ -1,17 +1,15 @@
-import requests
+import json
 import os
 from datetime import datetime
-from flask import Flask, jsonify
-from flask_cors import CORS
-from flask import make_response
 from urllib.parse import urlparse
-import json
+
 import psycopg2
-
-
+import requests
+from flask import Flask, jsonify, make_response
+from flask_cors import CORS
 
 # Parse service url
-service_url = os.getenv('DATABASE_URL')
+service_url = os.getenv("DATABASE_URL")
 result = urlparse(service_url)
 username = result.username
 password = result.password
@@ -21,35 +19,27 @@ port = result.port
 
 # Connect to the database
 conn = psycopg2.connect(
-    dbname=database,
-    user=username,
-    password=password,
-    host=hostname,
-    port=port
+    dbname=database, user=username, password=password, host=hostname, port=port
 )
 
 cur = conn.cursor()
 
 
-
-
-
-
-
-
-
 app = Flask(__name__)
 
-origins = [
-    "https://apostats.vercel.app",
-    "http://localhost:3000"
-    ]
+origins = ["https://apostats.vercel.app", "http://localhost:3000"]
 
-cors = CORS(app, resources={
-    r"/get_all_calls": {"origins": origins},
-    r"/get_fabian": {"origins": origins},
-    r"/change_date": {"origins": origins},
-    })
+cors = CORS(app, resources={r"/*": {"origins": origins}})
+
+# cors = CORS(
+#    app,
+#    resources={
+#        r"/get_all_calls": {"origins": origins},
+#        r"/get_fabian": {"origins": origins},
+#        r"/change_date": {"origins": origins},
+#    },
+# )
+
 
 all_calls = {
     "JULIA": 0,
@@ -58,7 +48,6 @@ all_calls = {
     "SOFIA": 0,
     "FABIAN": 0,
 }
-
 
 
 UsersKundtjanst = {
@@ -70,22 +59,25 @@ UsersKundtjanst = {
 }
 
 UsersAPI = {
-    "0104104956": os.environ['TELAVOX_API_KEY_FABIAN'],
-    "0104102466": os.environ['TELAVOX_API_KEY_JULIA'],
-    "0104102496": os.environ['TELAVOX_API_KEY_SOFIA'],    
-    "0104102495": os.environ['TELAVOX_API_KEY_VALDEMAR'],    
-    "0104104951": os.environ['TELAVOX_API_KEY_MILLA'],
+    "0104104956": os.environ["TELAVOX_API_KEY_FABIAN"],
+    "0104102466": os.environ["TELAVOX_API_KEY_JULIA"],
+    "0104102496": os.environ["TELAVOX_API_KEY_SOFIA"],
+    "0104102495": os.environ["TELAVOX_API_KEY_VALDEMAR"],
+    "0104104951": os.environ["TELAVOX_API_KEY_MILLA"],
 }
-    
+
+
 def clear_calls():
     global all_calls
     for i in all_calls:
         all_calls[i] = 0
 
+
 def getCurrentDate():
     current_date = datetime.now()
-    todayDate = current_date.strftime('%Y-%m-%d')
+    todayDate = current_date.strftime("%Y-%m-%d")
     return todayDate
+
 
 # DB-funcs
 def add_one_call(username):
@@ -98,15 +90,23 @@ def add_one_call(username):
     conn.commit()
     return 0
 
+
 def update_prev(username, prev_id):
     update_prev = """
     UPDATE user_calls
     SET previous_id = %s
     WHERE username = %s;
     """
-    cur.execute(update_prev, (prev_id, username,))
+    cur.execute(
+        update_prev,
+        (
+            prev_id,
+            username,
+        ),
+    )
     conn.commit()
     return 0
+
 
 def check_prev(username):
     check_prev = """
@@ -147,50 +147,54 @@ def countCallsForAllUsers():
             "toDate": getCurrentDate(),
         }
         try:
-            response = requests.get("https://api.telavox.se/calls", headers=headers, params=params)
+            response = requests.get(
+                "https://api.telavox.se/calls", headers=headers, params=params
+            )
             response.raise_for_status()
-            incoming_calls = response.json().get('incoming', [])
+            incoming_calls = response.json().get("incoming", [])
 
             if incoming_calls:
-                latest_call_id = incoming_calls[0]['callId']
+                latest_call_id = incoming_calls[0]["callId"]
                 print(latest_call_id)
                 if check_prev(username) != latest_call_id:
                     add_one_call(username)
                     print(f"{username} took a call. Added one call.")
                     update_prev(username, latest_call_id)
                     print(latest_call_id)
-            
+
         except requests.exceptions.RequestException as req_err:
             print(f"Request exception occurred for {username}: {req_err}")
             return 209
-        
+
     return 0
+
 
 def is_sum_greater(data):
     return sum(data.values())
 
 
-    
-
-
 # Setting previous_calls & today_date
 today_date = getCurrentDate()
 
+
 # app.routes
-@app.route('/get_fabian', methods=['GET'])
+@app.route("/get_fabian", methods=["GET"])
 def get_fabian():
     add_one_call("FABIAN")
     return "Finish"
 
-@app.route('/change_date', methods=['GET'])
+
+@app.route("/change_date", methods=["GET"])
 def change_date():
     global today_date
     today_date = "2024-01-10"
     return "Date Changed"
 
+
 previous_sum = 0
 
-@app.route('/get_all_calls', methods=['GET'])
+
+@app.route("/get_all_calls", methods=["GET"])
 def get_all_calls():
     global today_date
     print(today_date)
@@ -199,7 +203,7 @@ def get_all_calls():
         today_date = getCurrentDate()
         cur.execute("UPDATE user_calls SET calls_count =0;")
         conn.commit()
-            
+
     countCallsForAllUsers()
     cur.execute("SELECT username, calls_count FROM user_calls;")
 
@@ -208,5 +212,7 @@ def get_all_calls():
     calls_dict = {username: calls_count for username, calls_count in user_calls}
 
     return jsonify(calls_dict)
-if __name__ == '__main__':
+
+
+if __name__ == "__main__":
     app.run(debug=True)
