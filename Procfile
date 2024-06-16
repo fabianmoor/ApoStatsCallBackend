@@ -1,1 +1,1 @@
-web: gunicorn -b 0.0.0.0 callRequests:app
+web: gunicorn callRequests:app
